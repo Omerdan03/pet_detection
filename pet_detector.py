@@ -121,12 +121,13 @@ def main():
         if not ret:
             break
 
+
         cv2.imshow('camera', frame)
 
-        object_dict = detect_objects(frame)
-        if 'dog' in object_dict:
-            dog_locations = object_dict['dog']
-            img_with_caption = add_caption_to_image(frame, object_dict)
+        # object_dict = detect_objects(frame)
+        # if 'dog' in object_dict:
+        #     dog_locations = object_dict['dog']
+        #     img_with_caption = add_caption_to_image(frame, object_dict)
 
 
         #cash.append(img_with_caption)
@@ -144,15 +145,14 @@ def main():
         #     break
         # #
         # img_with_caption2 = caption(input_img)
-        cv2.imshow('image', img_with_caption)
+        # cv2.imshow('image', img_with_caption)
         key = cv2.waitKey(30)
         if key == 27:
             break
 
     camera.release()
-
     cv2.destroyAllWindows()
-    imageio.mimsave('output.gif', video_images)
+    #imageio.mimsave('output.gif', video_images)
 
 
 if __name__ == "__main__":
