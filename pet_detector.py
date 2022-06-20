@@ -8,8 +8,6 @@ def main():
     detector = Detector(model_type='ssd')
 
     camera = cv2.VideoCapture(0)
-    fps = camera.get(cv2.CAP_PROP_FPS)
-
 
     while True:
         start_time = time.time()
@@ -17,7 +15,7 @@ def main():
         if not ret:
             break
 
-        class_ids, confs, bboxes = detector.detect(frame)
+        class_ids, confs, bboxes = detector.detect(frame, conf_threshold=0.1)
         if len(class_ids) != 0:  # Prevents from assessing when no objected was detected
             class_names = [detector.class_names[class_id - 1] for class_id in class_ids.flatten()]
 
