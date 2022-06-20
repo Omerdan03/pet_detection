@@ -19,10 +19,17 @@ def main():
             break
 
         class_ids, confs, bboxes = detector.detect(frame)
-        class_names = [detector.class_names[class_id -1] for class_id in class_ids.flatten()]
+        if len(class_ids) != 0:  # Prevents from assessing when no objected was detected
+            class_names = [detector.class_names[class_id - 1] for class_id in class_ids.flatten()]
 
-        if 'dog' in class_names:
-            pass
+            for i in range(len(class_names)):
+                x, y, w, h = bboxes[i]
+                cv2.putText(frame, class_names[i], (x, y - 15),
+                            cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+
+            if 'dog' in class_names:
+                print('dog')
 
 
         cv2.imshow('camera', frame)
