@@ -15,7 +15,7 @@ def main():
         if not ret:
             break
 
-        class_ids, confs, bboxes = detector.detect(frame, conf_threshold=0.1)
+        class_ids, confs, bboxes = detector.detect(frame, conf_threshold=0.5)
         if len(class_ids) != 0:  # Prevents from assessing when no objected was detected
             class_names = [detector.class_names[class_id - 1] for class_id in class_ids.flatten()]
 
