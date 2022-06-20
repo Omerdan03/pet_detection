@@ -1,22 +1,22 @@
-import os
-from collections import defaultdict
-
-import imageio
 from detector import Detector
 import cv2
-import pandas as pd
 import numpy as np
-
+import time
 
 def main():
 
     detector = Detector(model_type='ssd')
 
     camera = cv2.VideoCapture(0)
+    fps = camera.get(cv2.CAP_PROP_FPS)
+
+
     while True:
         ret, frame = camera.read()
         if not ret:
             break
+
+        cv2.putText(frame, f"current fps: {fps}", (0, 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
         class_ids, confs, bboxes = detector.detect(frame)
         if len(class_ids) != 0:  # Prevents from assessing when no objected was detected
