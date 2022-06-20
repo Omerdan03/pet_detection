@@ -8,6 +8,7 @@ def main():
     detector = Detector(model_type='ssd')
 
     camera = cv2.VideoCapture(0)
+    max_fps = camera.get(cv2.CAP_PROP_FPS)
 
     while True:
         start_time = time.time()
@@ -28,7 +29,8 @@ def main():
         #             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
         end_time = time.time()
-        fps = np.round(1 / (end_time - start_time), 2)
+        time_pass = end_time - start_time
+        fps = min(np.round(1 / time_pass, 2), max_fps)
         cv2.putText(frame, f"current fps: {fps}", (0, 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
         cv2.imshow('camera', frame)
         key = cv2.waitKey(30)
