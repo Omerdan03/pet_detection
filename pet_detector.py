@@ -12,11 +12,10 @@ def main():
 
 
     while True:
+        start_time = time.time()
         ret, frame = camera.read()
         if not ret:
             break
-
-        cv2.putText(frame, f"current fps: {fps}", (0, 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
 
         class_ids, confs, bboxes = detector.detect(frame)
         if len(class_ids) != 0:  # Prevents from assessing when no objected was detected
@@ -31,7 +30,9 @@ def main():
             if 'dog' in class_names:
                 print('dog')
 
-
+        end_time = time.time()
+        fps = np.round(1 / (end_time - start_time), 2)
+        cv2.putText(frame, f"current fps: {fps}", (0, 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
         cv2.imshow('camera', frame)
         key = cv2.waitKey(30)
         if key == 27:
