@@ -1,7 +1,30 @@
-from detector import Detector
+import argparse
 import cv2
 import numpy as np
-import time
+from datetime import datetime
+import os
+from os import path
+import sys
+
+from detector import Detector
+
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
+
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        prog='pet_monitor',
+        formatter_class=argparse.RawTextHelpFormatter,
+        description="Runs pet_monitor.")
+
+    parser.add_argument('-pet', metavar='pet', default="dog", type=str,
+                        help='type of pet to monitor for (dog / cat)')
+    parser.add_argument('-outputfolder', metavar='outputfolder', default='output', type=str,
+                        help='Path where output.csv and images will be saved')
+    args = parser.parse_args()
+    return args
 
 
 def mask_based_on_contours(contours, img_shape) -> np.ndarray:
@@ -16,44 +39,48 @@ def mask_based_on_contours(contours, img_shape) -> np.ndarray:
     return mask
 
 
+def time_to_string(time):
+    return time.strftime("%d_%m_%Y-%H_%M_%S")
+
+
 def main():
+    args = get_args()
     detector = Detector(model_type='ssd')
-
     camera = cv2.VideoCapture(0)
-    max_fps = camera.get(cv2.CAP_PROP_FPS)
 
-    # This part was an attempt in increase frame rate with movement detection
-    # movement_detector = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=40)
-
+    if not path.exists(args.outputfolder):
+        os.mkdir(args.outputfolder)
+    if not path.exists(path.join(args.outputfolder, 'output.csv')):
+        with open(path.join(args.outputfolder, 'detection_log.csv'), "a") as file:
+            file.write('time,indication\n')
+    last_check_time = datetime.now()
     while True:
-        start_time = time.time()
-        ret, frame = camera.read()
-        if not ret:
-            break
+        current_time = datetime.now()
+        if (current_time - last_check_time).seconds > 0:
 
-        # simple_mask = movement_detection.apply(frame)
-        # movement_contours, _ = cv2.findContours(simple_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # mask = mask_based_on_contours(movement_contours, frame.shape)
-        # masked_frame = mask * frame
+            time_string = time_to_string(current_time)
 
-        class_ids, confs, bboxes = detector.detect(frame, conf_threshold=0.5)
-        if len(class_ids) != 0:  # Prevents from assessing when no objected was detected
-            class_names = [detector.class_names[class_id - 1] for class_id in class_ids.flatten()]
+            ret, frame = camera.read()
+            indication = False
+            if not ret:
+                break
+            class_names, confs, bboxes = detector.detect(frame, conf_threshold=0.5)
+            if len(class_names) != 0:  # Prevents from assessing when no objected was detected
+                for i, class_name in enumerate(class_names):
+                    if class_name == args.pet:  # Printing only the requested class
+                        indication = True
+                        x, y, w, h = bboxes[i]
+                        cv2.putText(frame, class_name, (x, y - 15),
+                                    cv2.FONT_HERSHEY_PLAIN, 2, RED, 2)
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), GREEN, 3)
+            with open(path.join(args.outputfolder, 'detection_log.csv'), "a") as file:
+                file.write(f'{time_string}, {indication}\n')
 
-            for i, class_name in enumerate(class_names):
-                if class_name == 'dog':  # Printing only dogs on frame, can be changed to any class name
-                    x, y, w, h = bboxes[i]
-                    cv2.putText(frame, class_name, (x, y - 15),
-                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-
-        end_time = time.time()
-        time_pass = end_time - start_time
-        fps = min(np.round(1 / time_pass, 2), max_fps)
-        cv2.putText(frame, f"current fps: {fps}", (0, 30), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 0), 2)
-        # cv2.imshow('movement_mask', masked_frame
-
-        cv2.imshow('camera', frame)
+            cv2.putText(frame, time_string, (15, 30), cv2.FONT_HERSHEY_PLAIN, 1, BLACK, 2)
+            # cv2.putText(frame, f"Press ESC to close", (15, 30), cv2.FONT_HERSHEY_PLAIN, 1, BLACK, 2)
+            cv2.imwrite(path.join(args.outputfolder, f'{time_string}.jpg'), frame)
+            # cv2.imshow('camera', frame)
+            last_check_time = current_time
         key = cv2.waitKey(30)
         if key == 27:
             break
