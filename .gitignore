@@ -6,6 +6,9 @@ __pycache__/
 #output folder
 /output/*
 
+#weights folder
+/detector/weights/*
+
 # C extensions
 *.so
 

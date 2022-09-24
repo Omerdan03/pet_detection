@@ -4,7 +4,6 @@ import numpy as np
 from datetime import datetime
 import os
 from os import path
-import sys
 
 from detector import Detector
 
@@ -50,7 +49,7 @@ def main():
 
     if not path.exists(args.outputfolder):
         os.mkdir(args.outputfolder)
-    if not path.exists(path.join(args.outputfolder, 'output.csv')):
+    if not path.exists(path.join(args.outputfolder, 'detection_log.csv')):
         with open(path.join(args.outputfolder, 'detection_log.csv'), "a") as file:
             file.write('time,indication\n')
     last_check_time = datetime.now()
