@@ -11,7 +11,7 @@ class Detector:
     def __init__(self, model_type='ssd'):
         if model_type == 'ssd':
             config_path = os.path.join(FILE_DIR, 'weights', 'ssd_mobilenet_v3', 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt')
-            weights_path = os.path.join(FILE_DIR,'weights', 'ssd_mobilenet_v3', 'frozen_inference_graph.pb')
+            weights_path = os.path.join(FILE_DIR, 'weights', 'ssd_mobilenet_v3', 'frozen_inference_graph.pb')
         else:
             raise NotImplementedError("only ssd is currently supported")
 
